@@ -1,4 +1,4 @@
-module goconf
+module github.com/TBWISK/goconf
 
 go 1.13
 
