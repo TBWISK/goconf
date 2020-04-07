@@ -59,7 +59,10 @@ func (c *ConfigParse) Init() {
 		os.Exit(1)
 	}
 	c.NowConfig = cf
+	nowConfig = cf
 }
+
+var nowConfig *ini.File
 
 //GetConfig 获取配置文件
 func (c *ConfigParse) GetConfig() *ini.File {
