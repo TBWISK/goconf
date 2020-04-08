@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/garyburd/redigo/redis"
+	redisv7 "github.com/go-redis/redis/v7"
 )
 
 //newPool 创建连接池
@@ -50,7 +51,7 @@ func newRedisConfig(redisKey string, db int) *redis.Pool {
 	redisURL := sec.Key(_redisURL).MustString("")
 	redisPwd := sec.Key(_redisPwd).MustString("")
 	redisMaxIdle := sec.Key(_redisMaxIdle).MustInt(20)
-	redisMaxActivePool := sec.Key(_redisMaxActivePool).MustInt(1)
+	redisMaxActivePool := sec.Key(_redisMaxActivePool).MustInt(20)
 	option := redis.DialPassword(redisPwd)
 	_pool := newPool(redisURL, option, redisMaxActivePool, redisMaxIdle, db)
 	return _pool
@@ -61,4 +62,23 @@ func InitRedis(key string, db int) *redis.Pool {
 	// pool 获取客户端 需要显式close
 	pool := newRedisConfig(key, db)
 	return pool
+}
+
+//InitRedis1 初始化redis
+func InitRedis1(key string, db int) *redisv7.Client {
+	sec := nowConfig.Section("redis")
+	_redisURL := key + "_redis_url"
+	_redisPwd := key + "_redis_pwd"
+	redisURL := sec.Key(_redisURL).MustString("")
+	redisPwd := sec.Key(_redisPwd).MustString("")
+	client1 := redisv7.NewClient(&redisv7.Options{
+		Addr:     redisURL,
+		Password: redisPwd,
+		DB:       4,
+	})
+	cmd := client1.Ping()
+	if cmd.Err() != nil {
+		panic(cmd.Err())
+	}
+	return client1
 }
