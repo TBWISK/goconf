@@ -3,7 +3,7 @@ package goconf
 import (
 	"fmt"
 
-	"gopkg.in/mgo.v2"
+	"github.com/globalsign/mgo"
 )
 
 // 初始化
