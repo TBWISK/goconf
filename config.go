@@ -19,7 +19,9 @@ func NewConfigParse(Path string) *ConfigParse {
 	if Path[len(Path)-1:len(Path)] == "/" {
 		Path = Path[0 : len(Path)-1]
 	}
-	return &ConfigParse{Path: Path}
+	temp := &ConfigParse{Path: Path}
+	temp.init()
+	return temp
 }
 
 func (c *ConfigParse) getFilePath(name string) (path string) {
@@ -49,8 +51,8 @@ func (c *ConfigParse) getFileName() string {
 	return dev
 }
 
-//Init 内部初始化
-func (c *ConfigParse) Init() {
+//init 内部初始化
+func (c *ConfigParse) init() {
 	// name:=
 	path := c.getFilePath(c.getFileName())
 	cf, err := ini.Load(path)
