@@ -50,12 +50,13 @@ func MongoInit(key string) *mongo.Client {
 	mongodbURL := key + "_mongo_url"
 	mongoUser := key + "_mongo_user"
 	mongoPassword := key + "_mongo_password"
-	mongoIsAuth := key + "_mongo_is_auth"
+	mongoIsAuth := key + "_mongo_auth"
 	opts := options.Client()
 	hosts := strings.Split(sec.Key(mongodbURL).MustString(""), ",")
 	Username := sec.Key(mongoUser).MustString("")
 	Password := sec.Key(mongoPassword).MustString("")
 	opts = opts.SetHosts(hosts)
+	fmt.Println("auth", sec.Key(mongoIsAuth).MustInt(0))
 	if sec.Key(mongoIsAuth).MustInt(0) == 1 {
 		opts.SetAuth(options.Credential{
 			Username: Username,
