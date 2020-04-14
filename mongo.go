@@ -14,7 +14,7 @@ import (
 func newMongoConfig(key string) *mgo.Session {
 	sec := nowConfig.Section("mongo")
 	mongodbURL := key + "_mongo_url"
-	mongoIsAuth := key + "_mongo_is_auth"
+	mongoIsAuth := key + "_mongo_auth"
 	mongoUser := key + "_mongo_user"
 	mongoPassword := key + "_mongo_password"
 	// 判断是否为空
@@ -24,6 +24,7 @@ func newMongoConfig(key string) *mgo.Session {
 	}
 	mgoSession.SetMode(mgo.Eventual, true)
 	isAuth := sec.Key(mongoIsAuth).MustInt(0)
+	fmt.Println("isAuth", isAuth)
 	if isAuth == 1 {
 		root := sec.Key(mongoUser).MustString("")
 		Password := sec.Key(mongoPassword).MustString("")
