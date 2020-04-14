@@ -24,7 +24,6 @@ func newMongoConfig(key string) *mgo.Session {
 	}
 	mgoSession.SetMode(mgo.Eventual, true)
 	isAuth := sec.Key(mongoIsAuth).MustInt(0)
-	fmt.Println("isAuth", isAuth)
 	if isAuth == 1 {
 		root := sec.Key(mongoUser).MustString("")
 		Password := sec.Key(mongoPassword).MustString("")
@@ -56,7 +55,6 @@ func MongoInit(key string) *mongo.Client {
 	Username := sec.Key(mongoUser).MustString("")
 	Password := sec.Key(mongoPassword).MustString("")
 	opts = opts.SetHosts(hosts)
-	fmt.Println("auth", sec.Key(mongoIsAuth).MustInt(0))
 	if sec.Key(mongoIsAuth).MustInt(0) == 1 {
 		opts.SetAuth(options.Credential{
 			Username: Username,
