@@ -37,14 +37,14 @@ func newMongoConfig(key string) *mgo.Session {
 	return mgoSession
 }
 
-//MgoInit 对mongodb的初始化 第三方库
-func MgoInit(key string) *mgo.Session {
+//InitMgo 对mongodb的初始化 第三方库
+func InitMgo(key string) *mgo.Session {
 	// mongodb 初始化
 	return newMongoConfig(key)
 }
 
-//MongoInit 初始化 官方库;暂时只支持单个mongo
-func MongoInit(key string) *mongo.Client {
+//InitMongo 初始化 官方库;暂时只支持单个mongo
+func InitMongo(key string) *mongo.Client {
 	sec := nowConfig.Section("mongo")
 	mongodbURL := key + "_mongo_url"
 	mongoUser := key + "_mongo_user"
