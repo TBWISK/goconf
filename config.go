@@ -16,7 +16,7 @@ type ConfigParse struct {
 
 //NewConfigParse 初始化
 func NewConfigParse(Path string) *ConfigParse {
-	if Path[len(Path)-1:len(Path)] == "/" {
+	if len(Path) != 0 && Path[len(Path)-1:len(Path)] == "/" {
 		Path = Path[0 : len(Path)-1]
 	}
 	temp := &ConfigParse{Path: Path}
