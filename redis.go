@@ -64,6 +64,53 @@ func InitRedis(key string, db int) *redis.Pool {
 	return pool
 }
 
+//InitRedisConfDb 初始化redis
+func InitRedisConfDb(redisKey string) *redis.Pool {
+	// pool 获取客户端 需要显式close
+	sec := nowConfig.Section("redis")
+	_redisURL := redisKey + "_redis_url"
+	_redisPwd := redisKey + "_redis_pwd"
+	_redisMaxIdle := redisKey + "_redis_max_idle"
+	_redisMaxActivePool := redisKey + "_redis_max_active_pool"
+	_redisDB := redisKey + "_redis_db"
+
+	redisURL := sec.Key(_redisURL).MustString("")
+	redisPwd := sec.Key(_redisPwd).MustString("")
+	redisMaxIdle := sec.Key(_redisMaxIdle).MustInt(20)
+	db := sec.Key(_redisDB).MustInt(-1)
+	if db == -1 {
+		panic("redis db not config")
+	}
+	redisMaxActivePool := sec.Key(_redisMaxActivePool).MustInt(20)
+	option := redis.DialPassword(redisPwd)
+	_pool := newPool(redisURL, option, redisMaxActivePool, redisMaxIdle, db)
+	return _pool
+}
+
+//InitRedis1ConfDb 初始化redis
+func InitRedis1ConfDb(key string) *redisv7.Client {
+	sec := nowConfig.Section("redis")
+	_redisURL := key + "_redis_url"
+	_redisPwd := key + "_redis_pwd"
+	_redisDB := key + "_redis_db"
+	redisURL := sec.Key(_redisURL).MustString("")
+	redisPwd := sec.Key(_redisPwd).MustString("")
+	db := sec.Key(_redisDB).MustInt(-1)
+	if db == -1 {
+		panic("redis db not config")
+	}
+	client1 := redisv7.NewClient(&redisv7.Options{
+		Addr:     redisURL,
+		Password: redisPwd,
+		DB:       db,
+	})
+	cmd := client1.Ping()
+	if cmd.Err() != nil {
+		panic(cmd.Err())
+	}
+	return client1
+}
+
 //InitRedis1 初始化redis
 func InitRedis1(key string, db int) *redisv7.Client {
 	sec := nowConfig.Section("redis")
@@ -74,7 +121,7 @@ func InitRedis1(key string, db int) *redisv7.Client {
 	client1 := redisv7.NewClient(&redisv7.Options{
 		Addr:     redisURL,
 		Password: redisPwd,
-		DB:       4,
+		DB:       db,
 	})
 	cmd := client1.Ping()
 	if cmd.Err() != nil {
