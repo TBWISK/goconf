@@ -44,3 +44,11 @@ func Test_GORM(t *testing.T) {
 		fmt.Println(x.Error)
 	}
 }
+
+func Test_log(t *testing.T) {
+	logger := NewLoger()
+	sugar := logger.Sugar()
+	sugar.Info("xxx", "xxx")
+	sugar.Error("error")
+	sugar.Warn("debug")
+}
