@@ -46,7 +46,11 @@ func Test_GORM(t *testing.T) {
 }
 
 func Test_log(t *testing.T) {
-	logger := NewLoger()
+	projectPath := "/Users/tbwisk/coding/github/goconf"
+	NewConfigParse(projectPath)
+	path := GetLogPath()
+	fmt.Println(path)
+	logger := NewLoger(path)
 	sugar := logger.Sugar()
 	sugar.Info("xxx", "xxx")
 	sugar.Error("error")

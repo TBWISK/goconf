@@ -9,8 +9,14 @@ import (
 	"go.uber.org/zap/zapcore"
 )
 
+//GetLogPath 获取日志路径
+func GetLogPath() string {
+	sec := nowConfig.Section("log")
+	return sec.Key("log_path").MustString("./temp/")
+}
+
 //NewLoger 初始化
-func NewLoger() *zap.Logger {
+func NewLoger(path string) *zap.Logger {
 	encoder := zapcore.NewConsoleEncoder(zapcore.EncoderConfig{
 		MessageKey:  "msg",
 		LevelKey:    "level",
@@ -36,8 +42,8 @@ func NewLoger() *zap.Logger {
 	})
 
 	// 获取 info、warn日志文件的io.Writer 抽象 getWriter() 在下方实现
-	infoWriter := getWriter("./temp/demo.log")
-	warnWriter := getWriter("./temp/demo_error.log")
+	infoWriter := getWriter(path + "/info.log")
+	warnWriter := getWriter(path + "/error.log")
 
 	// 最后创建具体的Logger
 	core := zapcore.NewTee(
@@ -52,7 +58,8 @@ func getWriter(filename string) io.Writer {
 	// demo.log是指向最新日志的链接
 	// 保存7天内的日志，每1小时(整点)分割一次日志
 	hook, err := rotatelogs.New(
-		filename+".%Y%m%d%H", // 没有使用go风格反人类的format格式
+		// filename+".%Y%m%d%H", // 没有使用go风格反人类的format格式
+		filename+".%Y%m%d",
 		rotatelogs.WithLinkName(filename),
 		rotatelogs.WithMaxAge(time.Hour*24*7),
 		rotatelogs.WithRotationTime(time.Hour),

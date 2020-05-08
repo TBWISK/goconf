@@ -39,7 +39,6 @@ func initMySQLURL(key string) string {
 //InitGorm 初始化
 func InitGorm(key string) *gorm.DB {
 	dbSubURL := initMySQLURL(key)
-	fmt.Println("dbSubURL", dbSubURL)
 	db, err := gorm.Open("mysql", dbSubURL)
 	if err != nil {
 		panic(err)
