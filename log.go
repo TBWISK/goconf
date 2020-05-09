@@ -62,7 +62,7 @@ func getWriter(filename string) io.Writer {
 		filename+".%Y%m%d",
 		rotatelogs.WithLinkName(filename),
 		rotatelogs.WithMaxAge(time.Hour*24*7),
-		rotatelogs.WithRotationTime(time.Hour),
+		rotatelogs.WithRotationTime(time.Hour*24),
 	)
 
 	if err != nil {
