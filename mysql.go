@@ -23,6 +23,8 @@ func newMysqlConfig(key string) *sql.DB {
 //InitMysql 初始化mysql
 func InitMysql(key string) *sql.DB {
 	db := newMysqlConfig(key)
+	db.SetMaxIdleConns(1)
+	db.SetMaxOpenConns(100)
 	return db
 }
 
