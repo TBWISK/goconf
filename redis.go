@@ -8,6 +8,37 @@ import (
 	redisv7 "github.com/go-redis/redis/v7"
 )
 
+//RedisConf redis配置信息
+type RedisConf struct {
+	URL           string
+	Pwd           string
+	MaxIdle       int
+	MaxActivePool int
+	DB            int
+}
+
+//NewRedisConf redis配置初始化
+func NewRedisConf(key string) *RedisConf {
+	section := nowConfig.Section("redis")
+	_redisURL := key + "_redis_url"
+	_redisPwd := key + "_redis_pwd"
+	_redisMaxIdle := key + "_redis_max_idle"
+	_redisMaxActivePool := key + "_redis_max_active_pool"
+	_redisDB := key + "_redis_db"
+	redisURL := section.Key(_redisURL).MustString("")
+	redisPwd := section.Key(_redisPwd).MustString("")
+	redisMaxIdle := section.Key(_redisMaxIdle).MustInt(5)
+	redisMaxActivePool := section.Key(_redisMaxActivePool).MustInt(20)
+	db := section.Key(_redisDB).MustInt(-1)
+	return &RedisConf{
+		URL:           redisURL,
+		Pwd:           redisPwd,
+		MaxIdle:       redisMaxIdle,
+		MaxActivePool: redisMaxActivePool,
+		DB:            db,
+	}
+}
+
 //newPool 创建连接池
 func newPool(server string, option redis.DialOption, redisMaxActivePool int, redisMaxIdle int, db int) *redis.Pool {
 	return &redis.Pool{
@@ -40,69 +71,40 @@ func newPool(server string, option redis.DialOption, redisMaxActivePool int, red
 	}
 }
 
-//NewRedisConfig 创建新的redis配置连接池
-func newRedisConfig(redisKey string, db int) *redis.Pool {
-	sec := nowConfig.Section("redis")
-	_redisURL := redisKey + "_redis_url"
-	_redisPwd := redisKey + "_redis_pwd"
-	_redisMaxIdle := redisKey + "_redis_max_idle"
-	_redisMaxActivePool := redisKey + "_redis_max_active_pool"
-
-	redisURL := sec.Key(_redisURL).MustString("")
-	redisPwd := sec.Key(_redisPwd).MustString("")
-	redisMaxIdle := sec.Key(_redisMaxIdle).MustInt(20)
-	redisMaxActivePool := sec.Key(_redisMaxActivePool).MustInt(20)
-	option := redis.DialPassword(redisPwd)
-	_pool := newPool(redisURL, option, redisMaxActivePool, redisMaxIdle, db)
-	return _pool
-}
-
 //InitRedis 初始化redis
 func InitRedis(key string, db int) *redis.Pool {
 	// pool 获取客户端 需要显式close
-	pool := newRedisConfig(key, db)
+	conf := NewRedisConf(key)
+	option := redis.DialPassword(conf.Pwd)
+	pool := newPool(conf.URL, option, conf.MaxActivePool, conf.MaxIdle, db)
 	return pool
 }
 
 //InitRedisConfDb 初始化redis
-func InitRedisConfDb(redisKey string) *redis.Pool {
+func InitRedisConfDb(key string) *redis.Pool {
 	// pool 获取客户端 需要显式close
-	sec := nowConfig.Section("redis")
-	_redisURL := redisKey + "_redis_url"
-	_redisPwd := redisKey + "_redis_pwd"
-	_redisMaxIdle := redisKey + "_redis_max_idle"
-	_redisMaxActivePool := redisKey + "_redis_max_active_pool"
-	_redisDB := redisKey + "_redis_db"
-
-	redisURL := sec.Key(_redisURL).MustString("")
-	redisPwd := sec.Key(_redisPwd).MustString("")
-	redisMaxIdle := sec.Key(_redisMaxIdle).MustInt(20)
-	db := sec.Key(_redisDB).MustInt(-1)
+	conf := NewRedisConf(key)
+	option := redis.DialPassword(conf.Pwd)
+	db := conf.DB
 	if db == -1 {
 		panic("redis db not config")
 	}
-	redisMaxActivePool := sec.Key(_redisMaxActivePool).MustInt(20)
-	option := redis.DialPassword(redisPwd)
-	_pool := newPool(redisURL, option, redisMaxActivePool, redisMaxIdle, db)
-	return _pool
+	pool := newPool(conf.URL, option, conf.MaxActivePool, conf.MaxIdle, db)
+	return pool
 }
 
 //InitRedis1ConfDb 初始化redis
 func InitRedis1ConfDb(key string) *redisv7.Client {
-	sec := nowConfig.Section("redis")
-	_redisURL := key + "_redis_url"
-	_redisPwd := key + "_redis_pwd"
-	_redisDB := key + "_redis_db"
-	redisURL := sec.Key(_redisURL).MustString("")
-	redisPwd := sec.Key(_redisPwd).MustString("")
-	db := sec.Key(_redisDB).MustInt(-1)
-	if db == -1 {
+	conf := NewRedisConf(key)
+	if conf.DB == -1 {
 		panic("redis db not config")
 	}
 	client1 := redisv7.NewClient(&redisv7.Options{
-		Addr:     redisURL,
-		Password: redisPwd,
-		DB:       db,
+		Addr:         conf.URL,
+		Password:     conf.Pwd,
+		DB:           conf.DB,
+		PoolSize:     conf.MaxActivePool,
+		MinIdleConns: conf.MaxIdle,
 	})
 	cmd := client1.Ping()
 	if cmd.Err() != nil {
@@ -113,15 +115,13 @@ func InitRedis1ConfDb(key string) *redisv7.Client {
 
 //InitRedis1 初始化redis
 func InitRedis1(key string, db int) *redisv7.Client {
-	sec := nowConfig.Section("redis")
-	_redisURL := key + "_redis_url"
-	_redisPwd := key + "_redis_pwd"
-	redisURL := sec.Key(_redisURL).MustString("")
-	redisPwd := sec.Key(_redisPwd).MustString("")
+	conf := NewRedisConf(key)
 	client1 := redisv7.NewClient(&redisv7.Options{
-		Addr:     redisURL,
-		Password: redisPwd,
-		DB:       db,
+		Addr:         conf.URL,
+		Password:     conf.Pwd,
+		DB:           db,
+		PoolSize:     conf.MaxActivePool,
+		MinIdleConns: conf.MaxIdle,
 	})
 	cmd := client1.Ping()
 	if cmd.Err() != nil {
