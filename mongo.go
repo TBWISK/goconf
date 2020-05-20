@@ -10,24 +10,41 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-// 初始化
-func newMongoConfig(key string) *mgo.Session {
+//MongoConf mongo 配置文件
+type MongoConf struct {
+	MongoURL string
+	Auth     int
+	User     string
+	Pwd      string
+}
+
+//NewMongoConf 获取mongo conf
+func NewMongoConf(key string) *MongoConf {
 	sec := nowConfig.Section("mongo")
 	mongodbURL := key + "_mongo_url"
 	mongoIsAuth := key + "_mongo_auth"
 	mongoUser := key + "_mongo_user"
 	mongoPassword := key + "_mongo_password"
+
+	return &MongoConf{
+		MongoURL: sec.Key(mongodbURL).MustString(""),
+		Auth:     sec.Key(mongoIsAuth).MustInt(0),
+		User:     sec.Key(mongoUser).MustString(""),
+		Pwd:      sec.Key(mongoPassword).MustString(""),
+	}
+}
+
+// 初始化
+func newMongoConfig(key string) *mgo.Session {
+	conf := NewMongoConf(key)
 	// 判断是否为空
-	mgoSession, err := mgo.Dial(sec.Key(mongodbURL).MustString(""))
+	mgoSession, err := mgo.Dial(conf.MongoURL)
 	if err != nil {
 		panic(err)
 	}
 	mgoSession.SetMode(mgo.Eventual, true)
-	isAuth := sec.Key(mongoIsAuth).MustInt(0)
-	if isAuth == 1 {
-		root := sec.Key(mongoUser).MustString("")
-		Password := sec.Key(mongoPassword).MustString("")
-		credential := &mgo.Credential{Username: root, Password: Password}
+	if conf.Auth == 1 {
+		credential := &mgo.Credential{Username: conf.User, Password: conf.Pwd}
 		err = mgoSession.Login(credential)
 		if err != nil {
 			fmt.Println(err)
@@ -45,20 +62,14 @@ func InitMgo(key string) *mgo.Session {
 
 //InitMongo 初始化 官方库;暂时只支持单个mongo
 func InitMongo(key string) *mongo.Client {
-	sec := nowConfig.Section("mongo")
-	mongodbURL := key + "_mongo_url"
-	mongoUser := key + "_mongo_user"
-	mongoPassword := key + "_mongo_password"
-	mongoIsAuth := key + "_mongo_auth"
+	conf := NewMongoConf(key)
 	opts := options.Client()
-	hosts := strings.Split(sec.Key(mongodbURL).MustString(""), ",")
-	Username := sec.Key(mongoUser).MustString("")
-	Password := sec.Key(mongoPassword).MustString("")
+	hosts := strings.Split(conf.MongoURL, ",")
 	opts = opts.SetHosts(hosts)
-	if sec.Key(mongoIsAuth).MustInt(0) == 1 {
+	if conf.Auth == 1 {
 		opts.SetAuth(options.Credential{
-			Username: Username,
-			Password: Password})
+			Username: conf.User,
+			Password: conf.Pwd})
 	}
 	client, err := mongo.NewClient(opts)
 	err = client.Connect(context.Background())
