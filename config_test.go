@@ -19,7 +19,7 @@ func Test_Config(t *testing.T) {
 	fmt.Println(redis.String(con.Do("get", "key")))
 }
 func Test_ConfigMongoInit(t *testing.T) {
-	projectPath := ""
+	projectPath := "/Users/tbwisk/coding/github/goconf"
 	NewConfigParse(projectPath)
 	mgoClient := InitMongo("xxx")
 	if err := mgoClient.Ping(context.Background(), nil); err != nil {
