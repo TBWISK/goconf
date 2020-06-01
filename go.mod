@@ -11,6 +11,7 @@ require (
 	github.com/jonboulle/clockwork v0.1.0 // indirect
 	github.com/lestrrat-go/file-rotatelogs v2.3.0+incompatible
 	github.com/lestrrat-go/strftime v1.0.1 // indirect
+	github.com/natefinch/lumberjack v2.0.0+incompatible
 	go.mongodb.org/mongo-driver v1.3.2
 	go.uber.org/zap v1.15.0
 	gopkg.in/ini.v1 v1.55.0

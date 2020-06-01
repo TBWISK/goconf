@@ -1,10 +1,15 @@
 package goconf
 
 import (
+	"fmt"
 	"io"
+	"net"
 	"time"
 
+	"log"
+
 	rotatelogs "github.com/lestrrat-go/file-rotatelogs"
+	"github.com/natefinch/lumberjack"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
@@ -64,9 +69,120 @@ func getWriter(filename string) io.Writer {
 		rotatelogs.WithMaxAge(time.Hour*24*7),
 		rotatelogs.WithRotationTime(time.Hour*24),
 	)
-
 	if err != nil {
 		panic(err)
 	}
 	return hook
+}
+
+//LoggerItem 容量切割
+type LoggerItem struct {
+	logger *log.Logger
+}
+
+//LoggerTools 日志工具
+type LoggerTools struct {
+	info *LoggerItem
+	err  *LoggerItem
+}
+
+//NewLoggerTools log 初始化
+func NewLoggerTools(path string) *LoggerTools {
+	infoPath := path + "/info.log"
+	errPath := path + "/error.log"
+	info := NewLoggerItem(infoPath)
+	err := NewLoggerItem(errPath)
+	return &LoggerTools{info: info, err: err}
+}
+
+//INFO info打印
+func (c *LoggerTools) INFO(mark string, brief string, msg string) {
+	c.info.INFO(mark, brief, msg)
+}
+
+//ERROR error打印
+func (c *LoggerTools) ERROR(mark string, brief string, msg string) {
+	c.err.ERROR(mark, brief, msg)
+}
+
+//WARN 告警打印
+func (c *LoggerTools) WARN(mark string, brief string, msg string) {
+	c.err.WARN(mark, brief, msg)
+}
+
+func init() {
+	LocationIP = getInternal()
+}
+
+//NewLoggerItem 创建日志工具
+func NewLoggerItem(Filename string) *LoggerItem {
+	logger := log.New(&lumberjack.Logger{
+		Filename:   Filename,
+		MaxSize:    100, // megabytes
+		MaxBackups: 10,
+		MaxAge:     360, //days
+	}, "", log.Ldate|log.Ltime|log.Lmicroseconds)
+	return &LoggerItem{logger: logger}
+
+}
+
+//LocationIP 本地ip
+var LocationIP string
+
+//Infof 打印普通日志
+func (c *LoggerItem) Infof(args ...interface{}) {
+	c.logger.Printf("%v %v - %v", LocationIP, "INFO", args)
+}
+
+//Error 打印错误日志
+func (c *LoggerItem) Error(err interface{}, funcName string, args ...interface{}) {
+	item := fmt.Sprintf("%v", args)
+	c.logger.Printf("%v %v %v [func_name:%s][args:%s]", "ERROR", LocationIP, err, funcName, item)
+}
+
+//Errorf 打印错误日志
+func (c *LoggerItem) Errorf(args ...interface{}) {
+	c.logger.Printf("%v %v - %s", "ERROR", LocationIP, args)
+}
+
+//Warnf 打印错误日志
+func (c *LoggerItem) Warnf(args ...interface{}) {
+	c.logger.Printf("%v %v - %v", "WARN", LocationIP, args)
+}
+
+//INFO info信息打印
+func (c *LoggerItem) INFO(mark string, brief string, msg string) {
+	line := fmt.Sprintf("INFO %v %v - %v; %v", LocationIP, mark, brief, msg)
+	c.logger.Println(line)
+}
+
+//WARN warn
+func (c *LoggerItem) WARN(mark string, brief string, msg string) {
+	line := fmt.Sprintf("WARN %v %v - %v; %v", LocationIP, mark, brief, msg)
+	c.logger.Println(time.Now(), line)
+}
+
+//ERROR warn
+func (c *LoggerItem) ERROR(mark string, brief string, msg string) {
+	line := fmt.Sprintf("ERROR %v %v - %v; %v", LocationIP, mark, brief, msg)
+	c.logger.Println(time.Now(), line)
+}
+
+//getInternal 获取本机ip 多个网卡只获取第一个
+func getInternal() (ip string) {
+	addrs, err := net.InterfaceAddrs()
+	if err != nil {
+		fmt.Println("error no ip")
+		return "127.0.0.1"
+	}
+	for _, a := range addrs {
+		if ipnet, ok := a.(*net.IPNet); ok && !ipnet.IP.IsLoopback() {
+			if ipnet.IP.To4() != nil {
+				// os.Stdout.WriteString(ipnet.IP.String() + "\n")
+				ip = ipnet.IP.String()
+				return ip
+			}
+		}
+	}
+	return ip
 }
