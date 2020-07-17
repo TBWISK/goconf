@@ -135,17 +135,25 @@ func ExecuteSQL(table string, sets map[string]interface{}, db *sql.DB) (int64, e
 		objs = append(objs, value)
 	}
 	sqlx := fmt.Sprintf("insert into %v (%v) values (%v)", table, strings.Join(keys, ","), strings.Join(values, ","))
+	return Execute(table, sqlx, objs, db)
+}
 
-	stmt, err := db.Prepare(sqlx)
+//Execute sql 执行
+func Execute(table string, sql string, values []interface{}, db *sql.DB) (int64, error) {
+	stmt, err := db.Prepare(sql)
 	if err != nil {
 		fmt.Println(err, "Prepare")
 		return 0, err
 	}
-	result, err := stmt.Exec(objs...)
+	result, err := stmt.Exec(values...)
 	if err != nil {
 		fmt.Println(err, "Exec")
 		return 0, err
 	}
 	return result.LastInsertId()
+}
+
+//FormatUpdateSQL 整理uppdate的sql语句
+func FormatUpdateSQL(sets map[string]interface{}, where map[string]interface{}) {
 
 }
