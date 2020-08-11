@@ -8,13 +8,13 @@ import (
 
 func Test_Csv(t *testing.T) {
 	message := make(chan []string, 10000)
-	f := func(items []string) {
+	f := func(items []string, cnt int) {
 		fmt.Println("xxx", items)
 	}
 	ReadCsv("/Users/tbwisk/Downloads/imei.csv", message, f, 100)
 }
 func Test_ReadCsvWorker(t *testing.T) {
-	f := func(items []string) {
+	f := func(items []string, cnt int) {
 		fmt.Println("xxx", items)
 	}
 	worker := func(items chan []string, wg *sync.WaitGroup) {
