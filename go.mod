@@ -16,5 +16,6 @@ require (
 	github.com/rafaeljusto/redigomock v2.3.0+incompatible
 	go.mongodb.org/mongo-driver v1.3.2
 	go.uber.org/zap v1.15.0
+	golang.org/x/crypto v0.0.0-20191205180655-e7c4368fe9dd
 	gopkg.in/ini.v1 v1.55.0
 )
