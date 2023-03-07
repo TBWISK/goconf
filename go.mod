@@ -17,7 +17,7 @@ require (
 	github.com/rafaeljusto/redigomock v2.4.0+incompatible
 	go.mongodb.org/mongo-driver v1.8.2
 	go.uber.org/zap v1.20.0
-	golang.org/x/crypto v0.0.0-20220112180741-5e0467b6c7ce
+	golang.org/x/crypto v0.1.0
 	gopkg.in/ini.v1 v1.66.3
 	gopkg.in/natefinch/lumberjack.v2 v2.0.0 // indirect
 )
