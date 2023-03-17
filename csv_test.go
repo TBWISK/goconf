@@ -11,7 +11,10 @@ func Test_Csv(t *testing.T) {
 	f := func(items []string, cnt int) {
 		fmt.Println("xxx", items)
 	}
-	ReadCsv("/Users/tbwisk/Downloads/imei.csv", message, f, 100)
+	item := 100
+	ReadCsv("/Users/tbwisk/Downloads/imei.csv", message, f, func(cnt int) {
+
+	}, item)
 }
 func Test_ReadCsvWorker(t *testing.T) {
 	f := func(items []string, cnt int) {
@@ -30,6 +33,8 @@ func Test_ReadCsvWorker(t *testing.T) {
 		}
 		wg.Done() //wg.Add(1) 默认已经添加
 	}
-	ReadCsvWorker("/Users/tbwisk/Downloads/imei.csv", f, 1000, worker, 10)
+	ReadCsvWorker("/Users/tbwisk/Downloads/imei.csv", f, func(c int) {
+
+	}, 1000, worker, 10)
 	fmt.Println("finish")
 }
