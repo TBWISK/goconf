@@ -13,8 +13,9 @@ func Test_log(t *testing.T) {
 	logger := NewLoger(path)
 	sugar := logger.Sugar()
 	sugar.Info("xxx", "xxx")
-	sugar.Error("error")
+	sugar.Errorw("msg", "keysAndValues", "2")
 	sugar.Warn("debug")
 	item := map[string]interface{}{"xxx": 1, "hjelo": "world"}
 	sugar.Info(item)
+
 }
